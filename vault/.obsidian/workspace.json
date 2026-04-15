@@ -1,0 +1,18 @@
+{
+  "main": {
+    "id": "main",
+    "type": "empty",
+    "width": 300
+  },
+  "left": {
+    "id": "left",
+    "type": "file-explorer",
+    "width": 260,
+    "collapsed": false
+  },
+  "right": {
+    "id": "right",
+    "type": "empty",
+    "width": 300,
+    "collapsed": true
+  }

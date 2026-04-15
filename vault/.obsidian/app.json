@@ -1,0 +1,14 @@
+{
+  "app": {
+    "defaultViewMode": "preview",
+    "livePreview": true,
+    "readableLineLength": true
+  },
+  "userDisabledFilters": null,
+  "legacyEditor": false,
+  "pdfExportSettings": {
+    "pageSize": "Letter",
+    "landscape": false,
+    "margin": "0",
+    "downscalePercent": 100
+  }
