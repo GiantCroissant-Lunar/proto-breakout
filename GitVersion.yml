@@ -1,0 +1,149 @@
+# GitVersion configuration
+# https://gitversion.net/docs/reference/configuration
+
+assembly-versioning-scheme: MajorMinorPatch
+assembly-file-versioning-scheme: MajorMinorPatch
+tag-prefix: '[vV]?'
+version-in-branch-pattern: '[vV]?(?<Version>[0-9]+\.[0-9]+\.[0-9]+)'
+version-strategy: MergeMessageBaseTagWithCommitCount
+major-version-bump-message: '\+semver:\s?(breaking|major)'
+minor-version-bump-message: '\+semver:\s?(feature|minor)'
+patch-version-bump-message: '\+semver:\s?(fix|patch)'
+no-bump-message: '\+semver:\s?(none|skip)'
+tag-pre-release-weight: 60000
+commit-date-format: yyyy-MM-dd
+merge-message-formats: {}
+update-build-number: true
+semantic-version-format: Strict
+branches:
+  main:
+    mode: ContinuousDelivery
+    tag: ''
+    increment: Patch
+    prevent-increment:
+      of-merged-branch: true
+    track-merge-target: false
+    track-merge-message: true
+    regex: ^m?main$
+    source-branches: []
+    is-source-branch-for: []
+    tracks-release-branches: false
+    is-release-branch: false
+    is-main-branch: true
+    pre-release-weight: 55000
+  develop:
+    mode: ContinuousDeployment
+    tag: alpha
+    increment: Minor
+    prevent-increment:
+      of-merged-branch: true
+    track-merge-target: true
+    track-merge-message: true
+    regex: ^dev(elop)?(ment)?$
+    source-branches: []
+    is-source-branch-for: []
+    tracks-release-branches: false
+    is-release-branch: false
+    is-main-branch: false
+    pre-release-weight: 0
+  pull-request:
+    mode: ContinuousDelivery
+    tag: PR
+    tag-number-pattern: '[/-](?<number>\d+)[-/]'
+    increment: Inherit
+    prevent-increment:
+      of-merged-branch: true
+    regex: ^(pull|pull\-requests|pr)[/-]
+    source-branches:
+      - main
+      - develop
+    is-source-branch-for: []
+    pre-release-weight: 30000
+  feature:
+    mode: ContinuousDelivery
+    tag: useBranchName
+    tag-number-pattern: '[/-](?<number>\d+)[-/]'
+    increment: Inherit
+    prevent-increment:
+      of-merged-branch: true
+    regex: features?[/-]
+    source-branches:
+      - main
+      - develop
+    is-source-branch-for: []
+    pre-release-weight: 30000
+  release:
+    mode: ContinuousDelivery
+    tag: beta
+    increment: Minor
+    prevent-increment:
+      of-merged-branch: true
+    regex: releases?[/-]
+    source-branches:
+      - main
+      - develop
+    is-source-branch-for: []
+    tracks-release-branches: false
+    is-release-branch: true
+    is-main-branch: false
+    pre-release-weight: 40000
+  hotfix:
+    mode: ContinuousDelivery
+    tag: beta
+    increment: Patch
+    prevent-increment:
+      of-merged-branch: true
+    regex: hotfix(es)?[/-]
+    source-branches:
+      - main
+    is-source-branch-for: []
+    tracks-release-branches: false
+    is-release-branch: false
+    is-main-branch: false
+    pre-release-weight: 40000
+  support:
+    mode: ContinuousDelivery
+    tag: ''
+    tag-number-pattern: '[/-](?<number>\d+)[-/]'
+    increment: Patch
+    prevent-increment:
+      of-merged-branch: true
+    regex: support[/-]
+    source-branches:
+      - main
+    is-source-branch-for: []
+    tracks-release-branches: false
+    is-release-branch: false
+    is-main-branch: true
+    pre-release-weight: 55000
+  unknown:
+    mode: ContinuousDelivery
+    tag: unknown
+    increment: Patch
+    prevent-increment:
+      of-merged-branch: true
+    regex: (?<BranchName>.+)
+    source-branches:
+      - main
+      - develop
+    is-source-branch-for: []
+    pre-release-weight: 30000
+ignore:
+  sha: []
+mode: ContinuousDelivery
+tag: ''
+increment: Inherit
+prevent-increment:
+  of-merged-branch: false
+  when-branch-merge: false
+  on-merge-to-main: false
+track-merge-target: false
+track-merge-message: true
+commit-message-incrementing: Enabled
+regex: ''
+source-branches: []
+is-source-branch-for: []
+tracks-release-branches: false
+is-release-branch: false
+is-main-branch: false
+pre-release-weight: 30000
