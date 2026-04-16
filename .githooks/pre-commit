@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+# Proto-Breakout pre-commit hook
+# Runs Biome lint + format check on staged JS files
+
+set -euo pipefail
+
+echo "🔍 Pre-commit: checking staged files..."
+
+# Get staged JS/HTML files
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM -- '*.js' '*.html')
+
+if [ -z "$STAGED_FILES" ]; then
+    echo "✓ No JS/HTML files to check"
+    exit 0
+fi
+
+echo "Files to check:"
+echo "$STAGED_FILES" | sed 's/^/  /'
+
+# Run Biome check (lint + format)
+# We check only the staged files, not the whole project
+if command -v npx &> /dev/null; then
+    npx biome check $STAGED_FILES
+    RESULT=$?
+else
+    echo "⚠ npx not found, skipping Biome check"
+    exit 0
+fi
+
+if [ $RESULT -ne 0 ]; then
+    echo ""
+    echo "❌ Biome check failed. Fix issues or run: task lint:fix"
+    exit 1
+fi
+
+echo "✓ Pre-commit checks passed"
+exit 0
