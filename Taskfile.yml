@@ -1,0 +1,100 @@
+# https://taskfile.dev
+
+version: '3'
+
+vars:
+  PROJECT_DIR: project
+  SERVER_PORT: 3000
+
+tasks:
+  default:
+    desc: Show available tasks
+    cmds:
+      - task --list-all
+
+  # --- Development ---
+  serve:
+    desc: Start local development server
+    dir: '{{.PROJECT_DIR}}'
+    cmds:
+      - python3 -m http.server {{.SERVER_PORT}} --bind 127.0.0.1
+    silent: false
+
+  # --- Code Quality ---
+  lint:
+    desc: Run Biome linter (check only)
+    cmds:
+      - npx biome check .
+    silent: false
+
+  lint:fix:
+    desc: Run Biome linter with auto-fix
+    cmds:
+      - npx biome check --write .
+    silent: false
+
+  format:
+    desc: Format code with Biome
+    cmds:
+      - npx biome format --write .
+    silent: false
+
+  check:
+    desc: Run all code quality checks
+    deps: [lint]
+    cmds:
+      - echo "✓ All checks passed"
+
+  # --- Versioning ---
+  version:
+    desc: Get current semantic version
+    cmds:
+      - dotnet-gitversion /showvariable SemVer
+    silent: true
+
+  version:full:
+    desc: Show full GitVersion info
+    cmds:
+      - dotnet-gitversion
+    silent: false
+
+  # --- Changelog ---
+  changelog:
+    desc: Generate changelog from git history
+    cmds:
+      - git-cliff --output CHANGELOG.md
+    silent: false
+
+  changelog:preview:
+    desc: Preview changelog to stdout
+    cmds:
+      - git-cliff
+    silent: false
+
+  # --- Git Hooks ---
+  hooks:install:
+    desc: Install git hooks
+    cmds:
+      - cp .githooks/pre-commit .git/hooks/pre-commit
+      - chmod +x .git/hooks/pre-commit
+      - echo "✓ Pre-commit hook installed"
+
+  hooks:uninstall:
+    desc: Remove git hooks
+    cmds:
+      - rm -f .git/hooks/pre-commit
+      - echo "✓ Pre-commit hook removed"
+
+  # --- Cleanup ---
+  clean:
+    desc: Clean build artifacts
+    cmds:
+      - rm -rf node_modules vendor dist build .task
+      - echo "✓ Cleaned"
+
+  # --- CI/CD ---
+  ci:
+    desc: Run CI pipeline
+    deps: [check]
+    cmds:
+      - echo "✓ CI pipeline complete"
