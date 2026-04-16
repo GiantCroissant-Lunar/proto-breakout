@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Breakout (1976)</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+        canvas {
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: -webkit-crisp-edges;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas"></canvas>
+    <script>
+        // 1976 Breakout - Visual Clone
+        // Reference: 250x360 portrait arcade screenshot
+        // Faithful recreation: no anti-aliasing, no modern effects
+        
+        const LOGICAL_WIDTH = 250;
+        const LOGICAL_HEIGHT = 360;
+        const SCALE = 3; // Integer upscale for crisp pixels
+        
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Set display size (scaled up)
+        canvas.width = LOGICAL_WIDTH * SCALE;
+        canvas.height = LOGICAL_HEIGHT * SCALE;
+        
+        // Disable smoothing for pixel-perfect rendering
+        ctx.imageSmoothingEnabled = false;
+        ctx.imageSmoothingQuality = 'off';
+        
+        // Colors sampled from reference image
+        const COLORS = {
+            BLACK: '#000000',
+            WHITE: '#CCCCCC',
+            RED: '#A31E0A',
+            ORANGE: '#C6850A',
+            GREEN: '#0A8533',
+            YELLOW: '#C2C229',
+            BLUE: '#0A85C2'
+        };
+        
+        // Layout measurements from reference analysis
+        const LAYOUT = {
+            topBorderY: 35,
+            topBorderHeight: 12,
+            playfieldTop: 48,
+            sideRailWidth: 2,
+            brickFieldTop: 95,
+            brickRowHeight: 12,
+            brickRows: 4,
+            brickCols: 13,
+            paddleY: 318,
+            paddleWidth: 12,
+            paddleHeight: 6,
+            ballSize: 4
+        };
+        
+        // Score display (3-digit, blocky numerals)
+        let leftScore = 0;
+        let rightScore = 0;
+        
+        // Create offscreen buffer for logical resolution rendering
+        const buffer = document.createElement('canvas');
+        buffer.width = LOGICAL_WIDTH;
+        buffer.height = LOGICAL_HEIGHT;
+        const bctx = buffer.getContext('2d');
+        bctx.imageSmoothingEnabled = false;
+        
+        // Draw a single digit (5x7 bitmap style)
+        function drawDigit(ctx, x, y, digit) {
+            const patterns = {
+                0: [1,1,1,0,1,1,1,1,0,1,1,0,1,0,1,1,0,1,1,0,1,1,0,1,1,0,1,1,1,1,1,0,0,0,1],
+                1: [0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0],
+                2: [1,1,1,1,0,0,0,0,1,0,0,0,0,0,1,0,0,1,1,0,0,1,1,0,0,1,0,0,0,1,1,1,1,1,1],
+                3: [1,1,1,1,0,0,0,0,1,0,0,0,0,0,1,0,1,1,1,0,0,0,0,0,1,0,0,0,0,0,1,1,1,1,1],
+                4: [0,0,1,1,0,0,1,0,1,1,0,0,1,0,1,0,1,1,1,1,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0],
+                5: [1,1,1,1,1,1,0,0,0,0,1,0,0,0,0,1,1,1,1,0,0,0,0,0,1,0,0,0,0,0,1,1,1,1,1],
+                6: [0,1,1,1,0,1,0,0,0,0,1,0,0,0,0,1,1,1,1,0,1,0,0,0,1,1,0,0,0,1,0,1,1,1,0],
+                7: [1,1,1,1,1,0,0,0,0,1,0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1],
+                8: [0,1,1,1,0,1,0,0,0,1,1,0,0,0,1,0,1,1,1,0,1,0,0,0,1,1,0,0,0,1,0,1,1,1,0],
+                9: [0,1,1,1,0,1,0,0,0,1,1,0,0,0,1,0,1,1,1,1,0,0,0,0,1,0,0,0,0,1,0,1,1,1,0]
+            };
+            
+            const pattern = patterns[digit];
+            if (!pattern) return;
+            
+            ctx.fillStyle = COLORS.BLACK;
+            for (let i = 0; i < 35; i++) {
+                if (pattern[i]) {
+                    const px = x + (i % 5);
+                    const py = y + Math.floor(i / 5);
+                    ctx.fillRect(px, py, 1, 1);
+                }
+            }
+        }
+        
+        // Draw 3-digit score
+        function drawScore(ctx, x, y, score) {
+            const s = Math.min(999, Math.max(0, score));
+            drawDigit(ctx, x, y, Math.floor(s / 100));
+            drawDigit(ctx, x + 7, y, Math.floor((s % 100) / 10));
+            drawDigit(ctx, x + 14, y, s % 10);
+        }
+        
+        // Main render function
+        function render() {
+            // Clear buffer to black
+            bctx.fillStyle = COLORS.BLACK;
+            bctx.fillRect(0, 0, LOGICAL_WIDTH, LOGICAL_HEIGHT);
+            
+            // Draw top border (white horizontal bar)
+            bctx.fillStyle = COLORS.WHITE;
+            bctx.fillRect(0, LAYOUT.topBorderY, LOGICAL_WIDTH, LAYOUT.topBorderHeight);
+            
+            // Draw side rails (thin white vertical lines in playfield)
+            bctx.fillRect(LAYOUT.sideRailWidth, LAYOUT.playfieldTop, 2, LOGICAL_HEIGHT - LAYOUT.playfieldTop);
+            bctx.fillRect(LOGICAL_WIDTH - LAYOUT.sideRailWidth - 2, LAYOUT.playfieldTop, 2, LOGICAL_HEIGHT - LAYOUT.playfieldTop);
+            
+            // Draw scores in top border (left and right)
+            drawScore(bctx, 15, LAYOUT.topBorderY + 2, leftScore);
+            drawScore(bctx, LOGICAL_WIDTH - 25, LAYOUT.topBorderY + 2, rightScore);
+            
+            // Draw brick field
+            const brickWidth = 16;
+            const brickGap = 2;
+            const totalBrickWidth = LAYOUT.brickCols * brickWidth + (LAYOUT.brickCols - 1) * brickGap;
+            const brickStartX = (LOGICAL_WIDTH - totalBrickWidth) / 2;
+            
+            const brickColors = [COLORS.RED, COLORS.ORANGE, COLORS.GREEN, COLORS.YELLOW];
+            
+            for (let row = 0; row < LAYOUT.brickRows; row++) {
+                bctx.fillStyle = brickColors[row];
+                for (let col = 0; col < LAYOUT.brickCols; col++) {
+                    const bx = brickStartX + col * (brickWidth + brickGap);
+                    const by = LAYOUT.brickFieldTop + row * LAYOUT.brickRowHeight;
+                    bctx.fillRect(bx, by, brickWidth, LAYOUT.brickRowHeight - 1);
+                }
+            }
+            
+            // Draw paddle (tiny blue rectangle near bottom)
+            bctx.fillStyle = COLORS.BLUE;
+            const paddleX = (LOGICAL_WIDTH - LAYOUT.paddleWidth) / 2;
+            bctx.fillRect(paddleX, LAYOUT.paddleY, LAYOUT.paddleWidth, LAYOUT.paddleHeight);
+            
+            // Draw ball (tiny blue dot on paddle)
+            const ballX = paddleX + LAYOUT.paddleWidth / 2 - LAYOUT.ballSize / 2;
+            const ballY = LAYOUT.paddleY - LAYOUT.ballSize;
+            bctx.fillRect(ballX, ballY, LAYOUT.ballSize, LAYOUT.ballSize);
+            
+            // Scale buffer to display canvas
+            ctx.drawImage(buffer, 0, 0, LOGICAL_WIDTH * SCALE, LOGICAL_HEIGHT * SCALE);
+            
+            requestAnimationFrame(render);
+        }
+        
+        // Start rendering
+        render();
+    </script>
+</body>
+</html>

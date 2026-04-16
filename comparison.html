@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Breakout Comparison</title>
+    <style>
+        body { background: #000; color: #fff; font-family: monospace; margin: 20px; }
+        .container { display: flex; gap: 20px; }
+        .panel { text-align: center; }
+        img { border: 2px solid #333; max-width: 640px; }
+        h2 { color: #ff0; }
+    </style>
+</head>
+<body>
+    <h1>Breakout 1976 Reference Comparison</h1>
+    <div class="container">
+        <div class="panel">
+            <h2>Reference Image</h2>
+            <img src="file:///Users/apprenticegc/Work/lunar-horse/proto-projects/proto-breakout/vault/references/images/breakout-gameplay-hires.png" alt="Reference">
+        </div>
+        <div class="panel">
+            <h2>Our Recreation</h2>
+            <img src="http://localhost:3000/screenshot.png" alt="Our Game" onerror="this.src='about:blank';this.alt='Load game first'">
+        </div>
+    </div>
+    <h2>Checklist:</h2>
+    <ul>
+        <li>[ ] Brick count per row matches</li>
+        <li>[ ] 8 rows of bricks</li>
+        <li>[ ] Colors: Yellow→Green→Orange→Red (bottom to top)</li>
+        <li>[ ] Brick gaps correct</li>
+        <li>[ ] Paddle size/position correct</li>
+        <li>[ ] Ball size correct</li>
+        <li>[ ] Side borders present</li>
+        <li>[ ] Score display style matches</li>
+    </ul>
+</body>
+</html>
