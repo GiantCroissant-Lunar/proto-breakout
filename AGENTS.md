@@ -24,11 +24,16 @@ The game loads `phaser-arcade-physics.min.js` via a relative path.
 
 ## Running
 
-Serve `project/` with any static file server:
+Serve `project/` with a static file server reachable from other devices:
 ```
-cd project && python3 -m http.server 3000
+cd project && python3 -m http.server 43000 --bind 0.0.0.0
 ```
-Then open http://localhost:3000
+
+Access URLs:
+- Same machine: http://localhost:43000
+- Other devices on the same Tailscale tailnet: http://juis-mac-mini.taild230e2.ts.net:43000
+
+When replying in Discord or other remote/mobile chats, prefer the Tailscale URL over `localhost` because `localhost` only works on the machine running the server.
 
 ## Conventions
 

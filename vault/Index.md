@@ -12,7 +12,8 @@ A Breakout game built with Phaser 4.
 ## Project Links
 
 - [GitHub](https://github.com/nousresearch/proto-breakout) *(if public)*
-- [Live Demo](http://localhost:3000) *(local dev)*
+- [Live Demo](http://localhost:43000) *(local dev)*
+- [Live Demo (Tailscale)](http://juis-mac-mini.taild230e2.ts.net:43000) *(same tailnet)*
 
 ## Docs Index
 
