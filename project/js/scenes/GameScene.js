@@ -35,25 +35,29 @@ class GameScene extends Phaser.Scene {
         this.scoreText = this.add.text(20, 12, 'Score: 0', {
             fontFamily: 'Arial',
             fontSize: '20px',
-            color: '#f5f5f5'
+            color: '#f5f5f5',
         });
 
-        this.levelText = this.add.text(width / 2, 12, `Level ${this.level}`, {
-            fontFamily: 'Arial',
-            fontSize: '20px',
-            color: '#f5f5f5'
-        }).setOrigin(0.5, 0);
+        this.levelText = this.add
+            .text(width / 2, 12, `Level ${this.level}`, {
+                fontFamily: 'Arial',
+                fontSize: '20px',
+                color: '#f5f5f5',
+            })
+            .setOrigin(0.5, 0);
 
         // Lives displayed as hearts
         this.livesGroup = this.add.group();
         this.updateLivesDisplay();
 
         // Launch instruction
-        this.launchText = this.add.text(width / 2, height / 2, 'Click or Press Space to Launch', {
-            fontFamily: 'Arial',
-            fontSize: '22px',
-            color: '#16c79a'
-        }).setOrigin(0.5);
+        this.launchText = this.add
+            .text(width / 2, height / 2, 'Click or Press Space to Launch', {
+                fontFamily: 'Arial',
+                fontSize: '22px',
+                color: '#16c79a',
+            })
+            .setOrigin(0.5);
 
         // --- COLLIDERS ---
         this.physics.add.collider(this.ball, this.paddle, this.hitPaddle, null, this);
@@ -136,10 +140,7 @@ class GameScene extends Phaser.Scene {
     launchBall() {
         if (this.ball.getData('onPaddle')) {
             this.ball.setData('onPaddle', false);
-            this.ball.setVelocity(
-                Phaser.Math.Between(-200, 200),
-                -400 - (this.level - 1) * 20
-            );
+            this.ball.setVelocity(Phaser.Math.Between(-200, 200), -400 - (this.level - 1) * 20);
             this.launchText.setVisible(false);
         }
     }
@@ -150,16 +151,13 @@ class GameScene extends Phaser.Scene {
         const norm = diff / (paddle.width / 2); // -1 to 1
         const speed = ball.body.speed;
 
-        ball.setVelocity(
-            norm * speed * 0.8,
-            -Math.abs(ball.body.velocity.y)
-        );
+        ball.setVelocity(norm * speed * 0.8, -Math.abs(ball.body.velocity.y));
     }
 
     hitBrick(ball, brick) {
         // Score
         this.score += brick.getData('points') || 10;
-        this.scoreText.setText('Score: ' + this.score);
+        this.scoreText.setText(`Score: ${this.score}`);
 
         // Destroy brick
         brick.destroy();
