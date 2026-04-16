@@ -1,0 +1,14 @@
+{
+  "name": "proto-breakout",
+  "version": "0.1.0",
+  "description": "A Breakout game built with Phaser 4",
+  "type": "module",
+  "scripts": {
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "format": "biome format --write ."
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.0"
+  }
+}
