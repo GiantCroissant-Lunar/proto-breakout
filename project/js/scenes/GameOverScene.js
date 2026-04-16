@@ -1,53 +1,97 @@
-// Game Over Scene - shows final score and restarts
 class GameOverScene extends Phaser.Scene {
     constructor() {
         super('GameOverScene');
     }
 
     create() {
-        const { width, height } = this.scale;
         const finalScore = this.registry.get('finalScore') || 0;
+        const hiScore = this.registry.get('hiScore') || finalScore;
+        const topBorder = BREAKOUT_1976.hud.topBorder;
+        const colors = BREAKOUT_1976.colors.int;
+        const centerX = BREAKOUT_1976.world.width / 2;
 
-        // Game Over title
         this.add
-            .text(width / 2, height / 2 - 60, 'GAME OVER', {
-                fontFamily: 'Arial',
-                fontSize: '48px',
+            .rectangle(
+                centerX,
+                topBorder.whiteY + topBorder.whiteHeight / 2,
+                BREAKOUT_1976.world.width,
+                topBorder.whiteHeight,
+                colors.WHITE
+            )
+            .setOrigin(0.5, 0.5);
+
+        for (const segment of BREAKOUT_1976.walls.leftSegments) {
+            this.add
+                .rectangle(
+                    segment.x,
+                    segment.y,
+                    segment.width,
+                    segment.height,
+                    colors[segment.color]
+                )
+                .setOrigin(0, 0);
+        }
+
+        for (const segment of BREAKOUT_1976.walls.rightSegments) {
+            this.add
+                .rectangle(
+                    segment.x,
+                    segment.y,
+                    segment.width,
+                    segment.height,
+                    colors[segment.color]
+                )
+                .setOrigin(0, 0);
+        }
+
+        for (const marker of BREAKOUT_1976.hud.markerDefs) {
+            this.add
+                .rectangle(marker.x, marker.y, marker.width, marker.height, colors.WHITE)
+                .setOrigin(0, 0);
+        }
+
+        this.add
+            .text(centerX, 170, 'GAME OVER', {
+                fontFamily: 'monospace',
+                fontSize: '18px',
+                color: BREAKOUT_1976.colors.css.WHITE,
                 fontStyle: 'bold',
-                color: '#e94560',
             })
             .setOrigin(0.5);
 
-        // Final score
         this.add
-            .text(width / 2, height / 2, `Final Score: ${finalScore}`, {
-                fontFamily: 'Arial',
-                fontSize: '28px',
-                color: '#f5f5f5',
+            .text(centerX, 202, `SCORE ${String(finalScore).padStart(3, '0')}`, {
+                fontFamily: 'monospace',
+                fontSize: '12px',
+                color: BREAKOUT_1976.colors.css.WHITE,
             })
             .setOrigin(0.5);
 
-        // Restart instruction
+        this.add
+            .text(centerX, 220, `HI ${String(hiScore).padStart(3, '0')}`, {
+                fontFamily: 'monospace',
+                fontSize: '12px',
+                color: BREAKOUT_1976.colors.css.WHITE,
+            })
+            .setOrigin(0.5);
+
         const restartText = this.add
-            .text(width / 2, height / 2 + 80, 'Click or Press Space to Restart', {
-                fontFamily: 'Arial',
-                fontSize: '20px',
-                color: '#16c79a',
+            .text(centerX, 260, 'SPACE OR CLICK', {
+                fontFamily: 'monospace',
+                fontSize: '12px',
+                color: BREAKOUT_1976.colors.css.WHITE,
             })
             .setOrigin(0.5);
 
-        // Pulsing animation
         this.tweens.add({
             targets: restartText,
-            alpha: 0.5,
-            duration: 800,
+            alpha: 0.3,
+            duration: 600,
             yoyo: true,
             repeat: -1,
         });
 
-        // Input handling
-        this.input.on('pointerup', () => this.restartGame());
-
+        this.input.on('pointerdown', () => this.restartGame());
         this.spaceKey = this.input.keyboard.addKey('SPACE');
     }
 

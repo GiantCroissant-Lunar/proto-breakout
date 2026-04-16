@@ -1,12 +1,10 @@
-// Phaser 4 Breakout - Game Configuration
-const GAME_WIDTH = 800;
-const GAME_HEIGHT = 600;
-
+// Phaser Breakout - screenshot-locked configuration
 const game = new Phaser.Game({
-    type: Phaser.AUTO,
-    width: GAME_WIDTH,
-    height: GAME_HEIGHT,
-    backgroundColor: '#1a1a2e',
+    type: Phaser.CANVAS,
+    parent: 'game',
+    width: BREAKOUT_1976.world.width,
+    height: BREAKOUT_1976.world.height,
+    backgroundColor: BREAKOUT_1976.colors.css.BLACK,
     physics: {
         default: 'arcade',
         arcade: {
@@ -19,4 +17,7 @@ const game = new Phaser.Game({
         mode: Phaser.Scale.FIT,
         autoCenter: Phaser.Scale.CENTER_BOTH,
     },
+    antialias: false,
+    roundPixels: true,
+    pixelArt: true,
 });

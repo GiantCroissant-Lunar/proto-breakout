@@ -1,44 +1,50 @@
-// Boot Scene - generates all textures procedurally
 class BootScene extends Phaser.Scene {
     constructor() {
         super('BootScene');
     }
 
     create() {
-        // Generate paddle texture
-        const paddleGfx = this.make.graphics({ x: 0, y: 0 });
-        paddleGfx.fillStyle(0x16c79a, 1);
-        paddleGfx.fillRoundedRect(0, 0, 120, 20, 6);
-        paddleGfx.generateTexture('paddle', 120, 20);
-        paddleGfx.destroy();
-
-        // Generate ball texture
-        const ballGfx = this.make.graphics({ x: 0, y: 0 });
-        ballGfx.fillStyle(0xf5f5f5, 1);
-        ballGfx.fillCircle(10, 10, 10);
-        ballGfx.generateTexture('ball', 20, 20);
-        ballGfx.destroy();
-
-        // Generate brick textures (5 rows, different colors)
-        const brickColors = [0xe94560, 0xff6b6b, 0xffa502, 0x2ed573, 0x1e90ff];
-        brickColors.forEach((color, i) => {
-            const brickGfx = this.make.graphics({ x: 0, y: 0 });
-            brickGfx.fillStyle(color, 1);
-            brickGfx.fillRoundedRect(0, 0, 70, 25, 4);
-            brickGfx.generateTexture(`brick_${i}`, 70, 25);
-            brickGfx.destroy();
-        });
-
-        // Generate heart texture for lives
-        const heartGfx = this.make.graphics({ x: 0, y: 0 });
-        heartGfx.fillStyle(0xe94560, 1);
-        heartGfx.fillCircle(8, 8, 8);
-        heartGfx.fillCircle(22, 8, 8);
-        heartGfx.fillTriangle(0, 12, 15, 28, 30, 12);
-        heartGfx.generateTexture('heart', 30, 28);
-        heartGfx.destroy();
-
-        // Transition to game
+        this.createSolidTexture('black_pixel', BREAKOUT_1976.colors.int.BLACK);
+        this.createSolidTexture('white_pixel', BREAKOUT_1976.colors.int.WHITE);
+        this.createSolidTexture('light_gray_pixel', BREAKOUT_1976.colors.int.LIGHT_GRAY);
+        this.createSolidTexture('dark_gray_pixel', BREAKOUT_1976.colors.int.DARK_GRAY);
+        this.createSolidTexture('mid_gray_pixel', BREAKOUT_1976.colors.int.MID_GRAY);
+        this.createSolidTexture('blue_pixel', BREAKOUT_1976.colors.int.BLUE);
+        this.createBrickTexture('brick_red', BREAKOUT_1976.bricks.palette.RED);
+        this.createBrickTexture('brick_orange', BREAKOUT_1976.bricks.palette.ORANGE);
+        this.createBrickTexture('brick_green', BREAKOUT_1976.bricks.palette.GREEN);
+        this.createBrickTexture('brick_yellow', BREAKOUT_1976.bricks.palette.YELLOW);
         this.scene.start('GameScene');
+    }
+
+    createSolidTexture(key, color) {
+        if (this.textures.exists(key)) {
+            return;
+        }
+
+        const graphics = this.make.graphics({ x: 0, y: 0, add: false });
+        graphics.fillStyle(color, 1);
+        graphics.fillRect(0, 0, 1, 1);
+        graphics.generateTexture(key, 1, 1);
+        graphics.destroy();
+    }
+
+    createBrickTexture(key, palette) {
+        if (this.textures.exists(key)) {
+            return;
+        }
+
+        const graphics = this.make.graphics({ x: 0, y: 0, add: false });
+        graphics.fillStyle(palette.face, 1);
+        graphics.fillRect(0, 0, BREAKOUT_1976.bricks.widths[0] - 1, 1);
+        graphics.fillStyle(palette.shade, 1);
+        graphics.fillRect(
+            0,
+            1,
+            BREAKOUT_1976.bricks.widths[0] - 1,
+            BREAKOUT_1976.bricks.height - 2
+        );
+        graphics.generateTexture(key, BREAKOUT_1976.bricks.widths[0], BREAKOUT_1976.bricks.height);
+        graphics.destroy();
     }
 }
