@@ -35,6 +35,15 @@ Access URLs:
 
 When replying in Discord or other remote/mobile chats, prefer the Tailscale URL over `localhost` because `localhost` only works on the machine running the server.
 
+## Screen Resolution Reference
+
+The game targets the **1976 Atari Breakout** arcade cabinet.
+- **MAME raw raster**: 896×252 @ 63.45 Hz, rotated 90° (discrete logic simulation)
+- **Canonical playfield resolution**: **263×379 px** — derived from pixel-perfect analysis of arcade screenshots (`vault/references/images/breakout-gameplay-hires.png`)
+- A smaller 250×360 downscaled reference (`project/reference.png`) also exists but should be considered secondary
+
+Source: MAME `nl_breakout.cpp` netlist driver (DICE-derived discrete logic simulation), Arcade Database (adb.arcadeitalia.net)
+
 ## Conventions
 
 - All game scenes in `project/js/scenes/`

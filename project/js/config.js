@@ -1,6 +1,6 @@
 // Phaser Breakout - screenshot-locked configuration
 const game = new Phaser.Game({
-    type: Phaser.CANVAS,
+    type: Phaser.WEBGL,
     parent: 'game',
     width: BREAKOUT_1976.world.width,
     height: BREAKOUT_1976.world.height,

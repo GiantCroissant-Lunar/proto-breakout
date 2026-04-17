@@ -33,24 +33,21 @@ class GameScene extends Phaser.Scene {
 
         const paddleHalfWidth = BREAKOUT_1976.paddle.width / 2;
         this.paddle = this.physics.add.image(
-            BREAKOUT_1976.world.width / 2,
+            BREAKOUT_1976.paddle.initialX,
             BREAKOUT_1976.paddle.y + BREAKOUT_1976.paddle.height / 2,
-            'white_pixel'
+            'blue_paddle'
         );
         this.paddle.setImmovable(true);
-        this.paddle.setDisplaySize(BREAKOUT_1976.paddle.width, BREAKOUT_1976.paddle.height);
         this.paddle.body.setAllowGravity(false);
         this.paddle.body.setSize(BREAKOUT_1976.paddle.width, BREAKOUT_1976.paddle.height);
         this.paddle.body.moves = false;
 
-        this.ball = this.physics.add.image(0, 0, 'white_pixel');
-        this.ball.setDisplaySize(BREAKOUT_1976.ball.size, BREAKOUT_1976.ball.size);
+        this.ball = this.physics.add.image(0, 0, 'white_ball');
         this.ball.body.setAllowGravity(false);
         this.ball.body.setSize(BREAKOUT_1976.ball.size, BREAKOUT_1976.ball.size);
         this.ball.setBounce(1, 1);
         this.ball.setCollideWorldBounds(true);
         this.ball.setData('onPaddle', true);
-        this.ball.setAlpha(0);
         this.ball.setPosition(this.paddle.x, this.getBallRestingY());
 
         this.physics.add.collider(this.ball, this.paddle, this.hitPaddle, null, this);
@@ -110,7 +107,8 @@ class GameScene extends Phaser.Scene {
                 topBorder.whiteHeight,
                 colors.WHITE
             )
-            .setOrigin(0.5, 0.5);
+            .setOrigin(0.5, 0.5)
+            .setDepth(10);
 
         for (const segment of BREAKOUT_1976.walls.leftSegments) {
             this.add
@@ -121,7 +119,8 @@ class GameScene extends Phaser.Scene {
                     segment.height,
                     colors[segment.color]
                 )
-                .setOrigin(0, 0);
+                .setOrigin(0, 0)
+                .setDepth(10);
         }
 
         for (const segment of BREAKOUT_1976.walls.rightSegments) {
@@ -133,20 +132,17 @@ class GameScene extends Phaser.Scene {
                     segment.height,
                     colors[segment.color]
                 )
-                .setOrigin(0, 0);
+                .setOrigin(0, 0)
+                .setDepth(10);
         }
 
         for (const marker of BREAKOUT_1976.walls.paddleMarkers) {
             this.add
                 .rectangle(marker.x, marker.y, marker.width, marker.height, colors[marker.color])
-                .setOrigin(0, 0);
+                .setOrigin(0, 0)
+                .setDepth(10);
         }
 
-        for (const marker of BREAKOUT_1976.hud.markerDefs) {
-            this.add
-                .rectangle(marker.x, marker.y, marker.width, marker.height, colors.WHITE)
-                .setOrigin(0, 0);
-        }
     }
 
     createHud() {
@@ -154,32 +150,41 @@ class GameScene extends Phaser.Scene {
             BREAKOUT_1976.hud.leftScoreX,
             BREAKOUT_1976.hud.scoreY
         );
+        this.leftScoreContainer.setDepth(20);
         this.rightScoreContainer = this.add.container(
             BREAKOUT_1976.hud.rightScoreX,
             BREAKOUT_1976.hud.scoreY
         );
+        this.rightScoreContainer.setDepth(20);
+
+        this.leftIndicatorContainer = this.add.container(
+            BREAKOUT_1976.hud.indicatorXLeft,
+            BREAKOUT_1976.hud.indicatorY
+        );
+        this.leftIndicatorContainer.setDepth(20);
+
+        this.rightIndicatorContainer = this.add.container(
+            BREAKOUT_1976.hud.indicatorXRight,
+            BREAKOUT_1976.hud.indicatorY
+        );
+        this.rightIndicatorContainer.setDepth(20);
     }
 
     createBricks() {
         for (const rowDef of BREAKOUT_1976.bricks.rowDefs) {
             for (const [index, brickX] of BREAKOUT_1976.bricks.xPositions.entries()) {
+                const width = BREAKOUT_1976.bricks.widths[index];
                 const brick = this.bricks.create(
-                    brickX + BREAKOUT_1976.bricks.widths[index] / 2,
+                    brickX + width / 2,
                     rowDef.y + BREAKOUT_1976.bricks.height / 2,
-                    `brick_${rowDef.colorKey.toLowerCase()}`
+                    `brick_${rowDef.colorKey.toLowerCase()}_${rowDef.pattern}_${width}`
                 );
-                brick.setDisplaySize(
-                    BREAKOUT_1976.bricks.widths[index],
-                    BREAKOUT_1976.bricks.height
-                );
+                brick.setDisplaySize(width, BREAKOUT_1976.bricks.height);
                 brick.refreshBody();
-                // Close horizontal gaps by expanding physics body width slightly
-                brick.body.setSize(
-                    BREAKOUT_1976.bricks.widths[index] + 3,
-                    BREAKOUT_1976.bricks.height
-                );
+                brick.body.setSize(width + 3, BREAKOUT_1976.bricks.height);
                 brick.setData('points', rowDef.points);
                 brick.setData('colorKey', rowDef.colorKey);
+                brick.setDepth(15);
             }
         }
 
@@ -193,7 +198,6 @@ class GameScene extends Phaser.Scene {
 
         const direction = Math.random() > 0.5 ? 1 : -1;
         this.ball.setData('onPaddle', false);
-        this.ball.setAlpha(1);
         this.ball.setVelocity(
             direction * BREAKOUT_1976.ball.launchSpeedX,
             -BREAKOUT_1976.ball.launchSpeedY
@@ -277,7 +281,7 @@ class GameScene extends Phaser.Scene {
 
     shrinkPaddle() {
         this.paddleShrunk = true;
-        this.paddle.setDisplaySize(BREAKOUT_1976.paddle.shrunkWidth, BREAKOUT_1976.paddle.height);
+        this.paddle.setTexture('blue_paddle_shrunk');
         this.paddle.body.setSize(BREAKOUT_1976.paddle.shrunkWidth, BREAKOUT_1976.paddle.height);
         this.setPaddleCenter(this.paddle.x);
         if (this.ball.getData('onPaddle')) {
@@ -287,10 +291,11 @@ class GameScene extends Phaser.Scene {
 
     loseLife() {
         this.lives -= 1;
+        this.updateScoreDisplay();
 
         if (this.lives <= 0) {
             this.registry.set('finalScore', this.score);
-            this.scene.start('GameOverScene');
+            this.scene.start('GameOverScene', { screen: this.screen || 1, totalLives: 3 });
             return;
         }
 
@@ -299,50 +304,71 @@ class GameScene extends Phaser.Scene {
 
     resetBall() {
         this.ball.setData('onPaddle', true);
-        this.ball.setAlpha(0);
+        this.ball.setAlpha(1);
         this.ball.setVelocity(0, 0);
         this.ball.setPosition(this.paddle.x, this.getBallRestingY());
     }
 
     updateScoreDisplay() {
         this.renderDigits(this.leftScoreContainer, this.score, 3);
+        
+        this.renderDigits(this.leftIndicatorContainer, 1, 1);
+        
+        const maxLives = 3;
+        const currentBall = Math.max(1, maxLives - this.lives + 1);
+        this.renderDigits(this.rightIndicatorContainer, currentBall, 1);
     }
 
     updateHiScoreDisplay() {
-        this.renderDigits(this.rightScoreContainer, this.registry.get('hiScore') || 0, 4);
+        this.renderDigits(this.rightScoreContainer, this.registry.get('hiScore') || 0, 3);
     }
 
     renderDigits(container, value, length = 3) {
         const maxVal = 10 ** length - 1;
-        const digits = String(Phaser.Math.Clamp(Math.floor(value), 0, maxVal)).padStart(
-            length,
-            '0'
-        );
+        const digitsStr = String(Phaser.Math.Clamp(Math.floor(value), 0, maxVal)).padStart(length, '0');
         container.removeAll(true);
-        const pixelSize = BREAKOUT_1976.hud.digitPixelSize;
 
-        for (const [digitIndex, digit] of digits.split('').entries()) {
-            const pattern = BREAKOUT_1976.digits[digit];
+        const w = 14; 
+        const h = 22; 
+        const tX = 4; 
+        const tY = 4; 
+        
+        const segmentDefs = {
+            'A': { x: 0, y: 0, w: w, h: tY },
+            'B': { x: w - tX, y: 0, w: tX, h: 11 },
+            'C': { x: w - tX, y: h - 11, w: tX, h: 11 },
+            'D': { x: 0, y: h - tY, w: w, h: tY },
+            'E': { x: 0, y: h - 11, w: tX, h: 11 },
+            'F': { x: 0, y: 0, w: tX, h: 11 },
+            'G': { x: 0, y: 9, w: w, h: tY }
+        };
 
-            for (const [pixelIndex, pixel] of pattern.entries()) {
-                if (!pixel) {
-                    continue;
-                }
+        const segmentMap = {
+            '0': ['A', 'B', 'C', 'D', 'E', 'F'],
+            '1': ['B', 'C'],
+            '2': ['A', 'B', 'G', 'E', 'D'],
+            '3': ['A', 'B', 'G', 'C', 'D'],
+            '4': ['F', 'G', 'B', 'C'],
+            '5': ['A', 'F', 'G', 'C', 'D'],
+            '6': ['A', 'F', 'G', 'E', 'C', 'D'],
+            '7': ['A', 'B', 'C'],
+            '8': ['A', 'B', 'C', 'D', 'E', 'F', 'G'],
+            '9': ['A', 'F', 'B', 'G', 'C', 'D']
+        };
 
-                const x =
-                    digitIndex * BREAKOUT_1976.hud.digitAdvance +
-                    (pixelIndex % BREAKOUT_1976.hud.digitWidth) * pixelSize;
-                const y = Math.floor(pixelIndex / BREAKOUT_1976.hud.digitWidth) * pixelSize;
-                const shadow = this.add
-                    .image(x + 1, y + 1, 'dark_gray_pixel')
-                    .setOrigin(0, 0)
-                    .setDisplaySize(pixelSize, pixelSize);
-                const sprite = this.add
-                    .image(x, y, 'light_gray_pixel')
-                    .setOrigin(0, 0)
-                    .setDisplaySize(pixelSize, pixelSize);
-                container.add(shadow);
-                container.add(sprite);
+        const digitAdvance = 18;
+        const color = BREAKOUT_1976.colors.int.WHITE;
+
+        for (const [digitIndex, digit] of digitsStr.split('').entries()) {
+            const offsetX = digitIndex * digitAdvance;
+            const segmentsKeys = segmentMap[digit];
+
+            for (const key of segmentsKeys) {
+                const def = segmentDefs[key];
+                const rect = this.add
+                    .rectangle(offsetX + def.x, def.y, def.w, def.h, color)
+                    .setOrigin(0, 0);
+                container.add(rect);
             }
         }
     }
