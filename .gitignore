@@ -30,4 +30,11 @@ coverage/
 # Taskfile
 .task/
 
+# Screenshots / build artifacts
+project/screenshot*.png
+project/game-screenshot*.png
+project/yt_thumb*.jpg
+project/api-capture.html
+
+
 
